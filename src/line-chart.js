@@ -1,43 +1,44 @@
-import {select} from 'd3-selection';
-import {scaleTime, scaleLinear} from 'd3-scale';
-import {axisBottom, axisLeft} from 'd3-axis';
-import {extent, max, min} from 'd3-array';
-import {line, curveMonotoneX} from 'd3-shape';
-import {groupBy} from './utils';
-import {timeFormat, timeParse} from 'd3-time-format';
+import { select } from "d3-selection";
+import { scaleTime, scaleLinear } from "d3-scale";
+import { axisBottom, axisLeft } from "d3-axis";
+import { extent, max, min } from "d3-array";
+import { line, curveMonotoneX } from "d3-shape";
+import { groupBy } from "./utils";
+import { timeFormat, timeParse } from "d3-time-format";
 
 export default function lineChart(d) {
   var height = 300;
   var width = 800;
-  var margin = {top: 20, right: 15, bottom: 25, left: 25};
+  var margin = { top: 20, right: 15, bottom: 25, left: 25 };
   width = width - margin.left - margin.right;
   height = height - margin.top - margin.bottom;
-  var svg = select('#line-graph')
-    .append('svg')
-    .attr('width', width + margin.left + margin.right)
-    .attr('height', height + margin.top + margin.bottom)
-    .append('g')
-    .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+  var svg = select("#line-graph")
+    .append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-  var parseTime = timeParse('%Y');
+  var parseTime = timeParse("%Y");
   var data_clean = d.map(function(row) {
     row.CONTACT_DATE = parseTime(row.CONTACT_DATE.substring(0, 3));
     return row;
   });
   console.log(data_clean);
-  var data = groupBy(data_clean, 'CONTACT_DATE');
+  var data = groupBy(data_clean, "CONTACT_DATE");
   var x = scaleTime()
     .domain(extent(data, d => d.CONTACT_DATE))
     .range([0, width]);
   svg
-    .append('g')
-    .attr('transform', 'translate(0, ' + height + ')')
+    .append("g")
+    .attr("transform", "translate(0, " + height + ")")
     .call(axisBottom(x));
 
   var y = scaleLinear()
-    .domain([0, max(d => d.value)])
+    // bug here because max requires data to iterate across
+    .domain([0, max(data, d => d.value)])
     .range([height, 0]);
-  svg.append('g').call(axisLeft(y));
+  svg.append("g").call(axisLeft(y));
 
   const lineScale = line()
     .x(d => {
@@ -48,14 +49,14 @@ export default function lineChart(d) {
 
   console.log(data);
   svg
-    .selectAll('path')
+    .selectAll("path")
     .data(data)
     .enter()
-    .append('path')
-    .attr('fill', 'none')
-    .attr('stroke', 'steelblue')
-    .attr('stroke-width', 1.5)
-    .attr('d', lineScale);
+    .append("path")
+    .attr("fill", "none")
+    .attr("stroke", "steelblue")
+    .attr("stroke-width", 1.5)
+    .attr("d", lineScale);
 
   // var d_time = d.map(function(row){
   //     return {time_frame: row.CONTACT_DATE.getFullYear()};
