@@ -1,10 +1,10 @@
-import {select, selectAll} from 'd3-selection';
-import {geoAlbers, geoPath} from 'd3-geo';
-import {getCounts} from './utils';
-import {scaleThreshold, scaleLinear} from 'd3-scale';
-import {extent, quantile} from 'd3-array';
-import {schemeBlues, schemeOranges} from 'd3-scale-chromatic';
-import summaryStats from './summary-stats.js';
+import { select, selectAll } from "d3-selection";
+import { geoAlbers, geoPath } from "d3-geo";
+import { getCounts } from "./utils";
+import { scaleThreshold, scaleLinear } from "d3-scale";
+import { extent, quantile } from "d3-array";
+import { schemeBlues, schemeOranges } from "d3-scale-chromatic";
+import summaryStats from "./summary-stats.js";
 
 export default function districtMap(data, crimes, districts, isrs) {
   console.log(districts);
@@ -14,7 +14,7 @@ export default function districtMap(data, crimes, districts, isrs) {
     var map_data = crimes;
   }
   var data_clean = map_data.map(function(d) {
-    const row = {...d};
+    const row = { ...d };
     if (isrs) {
       var dist = row.DISTRICT;
       if (dist.length > 2) {
@@ -27,23 +27,23 @@ export default function districtMap(data, crimes, districts, isrs) {
   });
 
   // var by_district = getCounts(data.map(d => ({...d, district: Number(d.district)})), 'district');
-  var by_district = getCounts(data_clean, 'DISTRICT');
+  var by_district = getCounts(data_clean, "DISTRICT");
   Object.keys(by_district)
-    .filter(key => key === '' || key === '51')
+    .filter(key => key === "" || key === "51")
     .forEach(key => delete by_district[key]);
 
   // Width and Height of the whole visualization
   var width = 700;
   var height = 580;
 
-  var svg = select(isrs ? '#map-isrs' : '#map-crimes')
-    .append('svg')
-    .attr('width', width)
-    .attr('height', height);
+  var svg = select(isrs ? "#map-isrs" : "#map-crimes")
+    .append("svg")
+    .attr("width", width)
+    .attr("height", height);
 
   // Append empty placeholder g element to the SVG
   // g will contain geometry elements
-  var g = svg.append('g');
+  var g = svg.append("g");
 
   var albersProjection = geoAlbers()
     .scale(70000)
@@ -67,29 +67,29 @@ export default function districtMap(data, crimes, districts, isrs) {
     .domain([color_min, color_max])
     .range([color_scheme[0], color_scheme[color_scheme.length - 1]]);
 
-  g.selectAll('path')
+  g.selectAll("path")
     .data(districts.features)
     .enter()
-    .append('path')
-    .attr('fill', function(d) {
+    .append("path")
+    .attr("fill", function(d) {
       return color(by_district[parseInt(d.properties.dist_num)]);
     })
-    .attr('stroke', '#333')
-    .attr('d', path_fn)
-    .attr('stroke-opacity', 0.5)
-    .attr('stroke-width', 1)
-    .attr('class', d => d.properties.dist_label)
-    .on('click', function(d) {
-      selectAll('path')
-        .attr('stroke-opacity', 0.5)
-        .attr('stroke-width', 1);
+    .attr("stroke", "#333")
+    .attr("d", path_fn)
+    .attr("stroke-opacity", 0.5)
+    .attr("stroke-width", 1)
+    .attr("class", d => d.properties.dist_label)
+    .on("click", function(d) {
+      selectAll("path")
+        .attr("stroke-opacity", 0.5)
+        .attr("stroke-width", 1);
       var paths = document.getElementsByClassName(d.properties.dist_label);
-      paths[0].setAttribute('stroke-opacity', 1);
-      paths[0].setAttribute('stroke-width', 3);
-      paths[1].setAttribute('stroke-opacity', 1);
-      paths[1].setAttribute('stroke-width', 3);
+      paths[0].setAttribute("stroke-opacity", 1);
+      paths[0].setAttribute("stroke-width", 3);
+      paths[1].setAttribute("stroke-opacity", 1);
+      paths[1].setAttribute("stroke-width", 3);
       var dist_geo = districts.features.filter(
-        row => row.properties.dist_num == d.properties.dist_num,
+        row => row.properties.dist_num == d.properties.dist_num
       );
       summaryStats(d.properties.dist_num, data, crimes, dist_geo);
     });
