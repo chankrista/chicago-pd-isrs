@@ -1,46 +1,46 @@
-import {select} from 'd3-selection';
-import {geoAlbers, geoPath} from 'd3-geo';
-import pctChart from './pct-summary.js';
+import { select } from "d3-selection";
+import { geoAlbers, geoPath } from "d3-geo";
+import pctChart from "./pct-summary.js";
 
 export default function summaryStats(dist, isrs, crimes, dist_geo) {
-  var time_data = isrs.filter(row => row.year == '2018');
+  var time_data = isrs.filter(row => row.year == "2018");
   var time_isrs = time_data.length;
-  var time_crimes = crimes.filter(row => row.year == '2018').length;
+  var time_crimes = crimes.filter(row => row.year == "2018").length;
   var dist_data = isrs.filter(
-    row => (row.year == '2018') & (row.DISTRICT == dist),
+    row => (row.year == "2018") & (row.DISTRICT == dist)
   );
   var dist_isrs = dist_data.length;
   var dist_crimes = crimes.filter(
-    row => (row.year == '2018') & (row.district == dist),
+    row => (row.year == "2018") & (row.district == dist)
   ).length;
-  select('#summary_isrs').html(
-    '<p>In 2018, there were <b>' +
+  select("#summary_isrs").html(
+    "<p>In 2018, there were <b>" +
       dist_isrs +
-      ' ISRs</b> in district ' +
+      " ISRs</b> in district " +
       dist +
-      ', which is <b>' +
+      ", which is <b>" +
       Math.round((dist_isrs / time_isrs) * 100) +
-      '%</b> of the citywide total.</p>',
+      "%</b> of the citywide total.</p>"
   );
-  select('#summary_crimes').html(
-    '<p>In 2018, there were <b>' +
+  select("#summary_crimes").html(
+    "<p>In 2018, there were <b>" +
       dist_crimes +
-      ' crimes</b> in district ' +
+      " crimes</b> in district " +
       dist +
-      ', which is <b>' +
+      ", which is <b>" +
       Math.round((dist_crimes / time_crimes) * 100) +
-      '%</b> of the citywide total.</p>',
+      "%</b> of the citywide total.</p>"
   );
   var width = 500;
   var height = 500;
-  select('#district-map')
-    .selectAll('*')
+  select("#district-map")
+    .selectAll("*")
     .remove();
-  var svg = select('#district-map')
-    .append('svg')
-    .attr('width', width)
-    .attr('height', height);
-  var g = svg.append('g');
+  var svg = select("#district-map")
+    .append("svg")
+    .attr("width", width)
+    .attr("height", height);
+  var g = svg.append("g");
   // turf geopackage. method called center, center of mass, centroid
   //NEED TO FIGURE OUT A WAY TO GET CENTROIDS
   // Append empty placeholder g element to the SVG
@@ -84,14 +84,14 @@ export default function summaryStats(dist, isrs, crimes, dist_geo) {
 
   var path_fn = geoPath().projection(albersProjection);
 
-  g.selectAll('path')
+  g.selectAll("path")
     .data(dist_geo)
     .enter()
-    .append('path')
-    .attr('stroke', '#333')
-    .attr('d', path_fn)
-    .attr('stroke-opacity', 0.5)
-    .attr('stroke-width', 1);
+    .append("path")
+    .attr("stroke", "#333")
+    .attr("d", path_fn)
+    .attr("stroke-opacity", 0.5)
+    .attr("stroke-width", 1);
 
   pctChart(dist_data, dist_isrs, time_data, time_isrs);
 }

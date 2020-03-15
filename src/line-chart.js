@@ -19,6 +19,7 @@ export default function lineChart(d) {
     .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+<<<<<<< HEAD
   var groups = {};
   for (let i = 0; i < d.length; i++) {
     var current_val = parseInt(d[i].counts);
@@ -52,6 +53,15 @@ export default function lineChart(d) {
   var parseTime = timeParse("%Y-%b-%d");
 
   //var data = groupBy(d, "month_year");
+=======
+  var parseTime = timeParse("%Y");
+  var data_clean = d.map(function(row) {
+    row.CONTACT_DATE = parseTime(row.CONTACT_DATE.substring(0, 3));
+    return row;
+  });
+  console.log(data_clean);
+  var data = groupBy(data_clean, "CONTACT_DATE");
+>>>>>>> a251cd3d6fa85c718a0e6b077ff8c454ff3d9304
   var x = scaleTime()
     .domain(extent(data, d => d[0]))
     .range([0, width]);
@@ -62,7 +72,12 @@ export default function lineChart(d) {
     .call(axisBottom(x));
 
   var y = scaleLinear()
+<<<<<<< HEAD
     .domain([0, max(data => data[1])])
+=======
+    // bug here because max requires data to iterate across
+    .domain([0, max(data, d => d.value)])
+>>>>>>> a251cd3d6fa85c718a0e6b077ff8c454ff3d9304
     .range([height, 0]);
   svg.append("g").call(axisLeft(y));
 
