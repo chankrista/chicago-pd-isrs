@@ -1,61 +1,88 @@
-import {select} from 'd3-selection';
-import {scaleTime, scaleLinear} from 'd3-scale';
-import {axisBottom, axisLeft} from 'd3-axis';
-import {extent, max, min} from 'd3-array';
-import {line, curveMonotoneX} from 'd3-shape';
-import {groupBy} from './utils';
-import {timeFormat, timeParse} from 'd3-time-format';
+import { select } from "d3-selection";
+import { scaleTime, scaleLinear } from "d3-scale";
+import { axisBottom, axisLeft } from "d3-axis";
+import { extent, max, min } from "d3-array";
+import { line, curveMonotoneX } from "d3-shape";
+import { groupBy } from "./utils";
+import { timeFormat, timeParse } from "d3-time-format";
 
 export default function lineChart(d) {
   var height = 300;
   var width = 800;
-  var margin = {top: 20, right: 15, bottom: 25, left: 25};
+  var margin = { top: 20, right: 15, bottom: 25, left: 25 };
   width = width - margin.left - margin.right;
   height = height - margin.top - margin.bottom;
-  var svg = select('#line-graph')
-    .append('svg')
-    .attr('width', width + margin.left + margin.right)
-    .attr('height', height + margin.top + margin.bottom)
-    .append('g')
-    .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+  var svg = select("#line-graph")
+    .append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-  var parseTime = timeParse('%Y');
-  var data_clean = d.map(function(row) {
-    row.CONTACT_DATE = parseTime(row.CONTACT_DATE.substring(0, 3));
-    return row;
-  });
-  console.log(data_clean);
-  var data = groupBy(data_clean, 'CONTACT_DATE');
+  var groups = {};
+  for (let i = 0; i < d.length; i++) {
+    var current_val = parseInt(d[i].counts);
+    var month_year = d[i]["month_year"];
+    console.log(month_year.toString());
+    if (Object.keys(groups).includes(month_year.toString())) {
+      //Trying to understand why this portion of if statement never executes.
+      //JS seems to convert dates into something else when converted to a string.
+      console.log("running");
+      groups[month_year] += current_val;
+    } else {
+      groups[month_year] = current_val;
+    }
+  }
+
+  // const groups = d.reduce((acc, row) => {
+  //   var current_val = parseInt(row["counts"]);
+  //   if (acc[row["month_year"]]) {
+  //     acc[row["month_year"]] = acc[row["month_year"]] + current_val;
+  //   } else {
+  //     acc[row["month_year"]] = current_val;
+  //   }
+  //   return acc;
+  // });
+
+  var data = Object.entries(groups)
+    .slice(5)
+    .map(row => [row[0], row[1].counts]);
+  console.log("your data", data);
+
+  var parseTime = timeParse("%Y-%b-%d");
+
+  //var data = groupBy(d, "month_year");
   var x = scaleTime()
-    .domain(extent(data, d => d.CONTACT_DATE))
+    .domain(extent(data, d => d[0]))
     .range([0, width]);
+  console.log("x", x);
   svg
-    .append('g')
-    .attr('transform', 'translate(0, ' + height + ')')
+    .append("g")
+    .attr("transform", "translate(0, " + height + ")")
     .call(axisBottom(x));
 
   var y = scaleLinear()
-    .domain([0, max(d => d.value)])
+    .domain([0, max(data => data[1])])
     .range([height, 0]);
-  svg.append('g').call(axisLeft(y));
+  svg.append("g").call(axisLeft(y));
 
   const lineScale = line()
     .x(d => {
-      console.log(d.CONTACT_DATE, x(d.CONTACT_DATE));
-      return x(d.CONTACT_DATE);
+      return x(d[0]);
     })
-    .y(d => y(d.value));
+    .y(d => y(d[1]));
 
-  console.log(data);
+  console.log("data again", data);
+
   svg
-    .selectAll('path')
+    .selectAll("path")
     .data(data)
     .enter()
-    .append('path')
-    .attr('fill', 'none')
-    .attr('stroke', 'steelblue')
-    .attr('stroke-width', 1.5)
-    .attr('d', lineScale);
+    .append("path")
+    .attr("fill", "none")
+    .attr("stroke", "steelblue")
+    .attr("stroke-width", 1.5)
+    .attr("d", lineScale);
 
   // var d_time = d.map(function(row){
   //     return {time_frame: row.CONTACT_DATE.getFullYear()};
