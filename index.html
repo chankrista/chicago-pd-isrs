@@ -1,50 +1,44 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
   <head>
     <title>ISRs by CPD</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+    />
   </head>
   <body>
-  	<h1>Investigatory Stop Reports by the Chicago Police Department 2016-2018</h1>
+    <h1>
+      Investigatory Stop Reports by the Chicago Police Department 2016-2018
+    </h1>
     <div id="app">
-    	<div id="mid">
-	    	<div id="left">
-		    	<div id="time-trend">
-		    		<form>
-		    			<input type="radio" id="Year" checked>Year
-		    			<input type="radio" id="Month">Month   			
-		    		</form>
-			    	<div id="line-graph">
-			    	</div>
-			    </div>
+      <div id="mid">
+        <div id="left">
+          <div id="time-trend">
+            <form>
+              <input type="radio" id="Year" checked />Year
+              <input type="radio" id="Month" />Month
+            </form>
+            <div id="line-graph"></div>
+          </div>
 
-		    	<div id="maps">
-		    		<div class="map">
-		    			<h3>ISRs</h3>
-				    	<div id="map-isrs">
-				    	</div>
-				    	<div id="summary_isrs">
-			    		</div>
-				    </div>
-				    <div class="map">
-				    	<h3>Crimes</h3>
-				    	<div id="map-crimes">
-				    	</div>
-				    	<div id="summary_crimes">
-			    		</div>
-				    </div>
-			    </div>
-			</div>		
-			<div id="slope-graph">
-			</div>
-		</div>
-		<div id="district-summary">
-			<div id="district-map">
-			</div>
-			<div id="district-graph">
-			</div>
-		</div>
+          <div id="maps">
+            <div class="map">
+              <h3>ISRs</h3>
+              <div id="map-isrs"></div>
+              <div id="summary_isrs"></div>
+            </div>
+            <div class="map">
+              <h3>Crimes</h3>
+              <div id="map-crimes"></div>
+              <div id="summary_crimes"></div>
+            </div>
+          </div>
+        </div>
+        <div id="slope-graph"></div>
+      </div>
+      <div id="body-cameras"></div>
     </div>
     <script src="bundle.js"></script>
   </body>

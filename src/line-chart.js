@@ -19,63 +19,43 @@ export default function lineChart(d) {
     .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-  var groups = {};
-  for (let i = 0; i < d.length; i++) {
-    var current_val = parseInt(d[i].count);
-    var month_year = d[i]["month_year"];
-
-    if (Object.keys(groups).includes(month_year.toString())) {
-      groups[month_year] += current_val;
-    } else {
-      groups[month_year] = current_val;
-    }
-  }
-
-  // const groups = d.reduce((acc, row) => {
-  //   var current_val = parseInt(row["counts"]);
-  //   if (acc[row["month_year"]]) {
-  //     acc[row["month_year"]] = acc[row["month_year"]] + current_val;
-  //   } else {
-  //     acc[row["month_year"]] = current_val;
-  //   }
-  //   return acc;
-  // });
-
+  var data = groupBy(d, "month_year");
   var parseTime = timeParse("%Y-%m-%d");
-  var data = Object.entries(groups);
-  var data = data.map(row => [parseTime(row[0]), row[1]]);
-  //var data = groupBy(d, "month_year");
+  var data = data
+    .map(d => ({ x: parseTime(d.x), y: d.y }))
+    .sort((a, b) => {
+      return a.x - b.x;
+    });
+
   var x = scaleTime()
-    .domain(extent(data, d => d[0]))
+    .domain(extent(data, d => d.x))
     .range([0, width]);
   console.log("x", x);
   svg
     .append("g")
     .attr("transform", "translate(0, " + height + ")")
     .call(axisBottom(x));
-  console.log("domain", [0, max(data.map(d => d[1]))]);
+  console.log("domain", [0, max(data.map(d => d.y))]);
   var y = scaleLinear()
-    .domain([0, max(data.map(d => d[1]))])
+    .domain([0, max(data.map(d => d.y))])
     .range([height, 0]);
   svg.append("g").call(axisLeft(y));
 
   const lineScale = line()
-    .x(d => {
-      return x(d);
-    })
-    .y(d => {
-      return y(d);
-    });
-  console.log("data here", data);
+    .x(d => x(d.x))
+    .y(d => y(d.y));
+
   svg
     .selectAll("path")
-    .data(data)
+    .data([data], d => d)
     .enter()
     .append("path")
-    .attr("fill", "steelblue")
+    .attr("fill", "none")
     .attr("stroke", "steelblue")
     .attr("stroke-width", 1.5)
-    .attr("d", lineScale);
+    .attr("d", d => {
+      return lineScale(d);
+    });
 
   // var d_time = d.map(function(row){
   //     return {time_frame: row.CONTACT_DATE.getFullYear()};

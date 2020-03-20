@@ -7,6 +7,7 @@ import "./stylesheets/main.css";
 import lineChart from "./line-chart";
 import districtMap from "./district-map.js";
 import slopeGraph from "./slope-graph.js";
+import bodyCamera from "./body-camera.js";
 
 // this will make your loading process 1 million times faster
 const prefix = window.location.origin.startsWith("http://localhost:")
@@ -29,8 +30,9 @@ function app(data, crimes, districts) {
   function render() {
     districtMap(data, crimes, districts, true);
     districtMap(data, crimes, districts, false);
-    lineChart(data); //Need to debug NaN issue.
-    slopeGraph(data, crimes);
+    //lineChart(data);
+    //slopeGraph(data, crimes);
+    bodyCamera(data);
   }
   render();
 }

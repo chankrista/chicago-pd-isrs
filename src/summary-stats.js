@@ -1,18 +1,22 @@
 import { select } from "d3-selection";
 import { geoAlbers, geoPath } from "d3-geo";
 import pctChart from "./pct-summary.js";
+import { groupBy } from "./utils";
 
 export default function summaryStats(dist, isrs, crimes, dist_geo) {
-  var time_data = isrs.filter(row => row.year == "2018");
-  var time_isrs = time_data.length;
-  var time_crimes = crimes.filter(row => row.year == "2018").length;
-  var dist_data = isrs.filter(
-    row => (row.year == "2018") & (row.DISTRICT == dist)
-  );
-  var dist_isrs = dist_data.length;
-  var dist_crimes = crimes.filter(
-    row => (row.year == "2018") & (row.district == dist)
-  ).length;
+  console.log(isrs);
+  console.log(crimes);
+  var time_data = isrs.filter(row => row.year === "2018");
+  var time_isrs = groupBy(time_data, "year")[0].y;
+
+  var time_crimes_data = crimes.filter(row => row.year === "2018");
+  var time_crimes = groupBy(time_crimes_data, "year")[0].y;
+  var dist_data = time_data.filter(row => row.DISTRICT == dist);
+  var dist_isrs = groupBy(time_data, "DISTRICT")[0].y;
+  var dist_crimes_data = time_crimes_data.filter(row => row.district == dist);
+  var dist_crimes = groupBy(dist_crimes_data, "district")[0].y;
+
+  console.log(time_isrs, time_crimes, dist_isrs, dist_crimes);
   select("#summary_isrs").html(
     "<p>In 2018, there were <b>" +
       dist_isrs +

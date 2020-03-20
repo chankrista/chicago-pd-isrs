@@ -1,23 +1,27 @@
 * {
-	margin: auto;
+  margin: auto;
 }
 
-#app{
-	display: inline-block;
+#line-graph {
+  margin: 20px;
 }
 
-#maps{
-	display: flex;
+#app {
+  display: inline-block;
 }
 
-.map{
-	display: flex;
-	flex-direction: column
+#maps {
+  display: flex;
 }
 
-#mid{
-	display: flex;
-	flex-direction: column;
+.map {
+  display: flex;
+  flex-direction: column;
+}
+
+#mid {
+  display: flex;
+  flex-direction: column;
 }
 
 a {
@@ -26,7 +30,7 @@ a {
 
 html,
 body {
-  background: #D6D6CE;
+  background: #d6d6ce;
   font-family: Verdana, Geneva, sans-serif;
   height: 100%;
   margin: 0;
@@ -34,7 +38,7 @@ body {
   width: 100%;
 }
 
-#district-summary{
-	display: flex;
-	flex-direction: column
+#district-summary {
+  display: flex;
+  flex-direction: column;
 }

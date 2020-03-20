@@ -1,36 +1,19 @@
 import { select, selectAll } from "d3-selection";
 import { geoAlbers, geoPath } from "d3-geo";
-import { getCounts } from "./utils";
+import { groupBy } from "./utils";
 import { scaleThreshold, scaleLinear } from "d3-scale";
 import { extent, quantile } from "d3-array";
 import { schemeBlues, schemeOranges } from "d3-scale-chromatic";
+import { bodyCamera } from "./body-camera.js";
 import summaryStats from "./summary-stats.js";
 
 export default function districtMap(data, crimes, districts, isrs) {
-  console.log(districts);
+  //add a time frame filter here once that's figured out.
   if (isrs) {
-    var map_data = data;
+    var dist_data = groupBy(data, "DISTRICT");
   } else {
-    var map_data = crimes;
+    var dist_data = groupBy(crimes, "district");
   }
-  var data_clean = map_data.map(function(d) {
-    const row = { ...d };
-    if (isrs) {
-      var dist = row.DISTRICT;
-      if (dist.length > 2) {
-        row.DISTRICT = dist.substring(0, dist.length - 2);
-      }
-    } else {
-      row.DISTRICT = Number(row.district);
-    }
-    return row;
-  });
-
-  // var by_district = getCounts(data.map(d => ({...d, district: Number(d.district)})), 'district');
-  var by_district = getCounts(data_clean, "DISTRICT");
-  Object.keys(by_district)
-    .filter(key => key === "" || key === "51")
-    .forEach(key => delete by_district[key]);
 
   // Width and Height of the whole visualization
   var width = 700;
@@ -53,15 +36,10 @@ export default function districtMap(data, crimes, districts, isrs) {
 
   var path_fn = geoPath().projection(albersProjection);
 
-  // if (isrs) {
-  //     var color_scheme = schemeBlues[9];
-  // } else {
-  //     var color_scheme = schemeOranges[9];
-  // }
   const color_scheme = isrs ? schemeBlues[9] : schemeOranges[9];
 
-  var color_min = Math.min(...Object.values(by_district));
-  var color_max = Math.max(...Object.values(by_district));
+  var color_min = Math.min(...dist_data.map(d => d.y));
+  var color_max = Math.max(...dist_data.map(d => d.y));
 
   var color = scaleLinear()
     .domain([color_min, color_max])
@@ -72,7 +50,9 @@ export default function districtMap(data, crimes, districts, isrs) {
     .enter()
     .append("path")
     .attr("fill", function(d) {
-      return color(by_district[parseInt(d.properties.dist_num)]);
+      return color(
+        dist_data.filter(row => row.x == d.properties.dist_num)[0].y
+      );
     })
     .attr("stroke", "#333")
     .attr("d", path_fn)
@@ -92,5 +72,6 @@ export default function districtMap(data, crimes, districts, isrs) {
         row => row.properties.dist_num == d.properties.dist_num
       );
       summaryStats(d.properties.dist_num, data, crimes, dist_geo);
+      //add code to highlight bar chart
     });
 }

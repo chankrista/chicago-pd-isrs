@@ -1,10 +1,10 @@
 import { groupBy } from "./utils";
 import { select } from "d3-selection";
 import { scaleBand, scaleLinear, scaleOrdinal } from "d3-scale";
-import { stack } from "d3-shape";
+import { stack, stackOrderDescending } from "d3-shape";
 import { slice } from "d3-array";
 import { schemeSpectral } from "d3-scale-chromatic";
-import { axisLeft, axisTop } from "d3-axis";
+import { axisLeft, axisTop, range } from "d3-axis";
 
 export default function bodyCamera(full_data) {
   var districts = [...new Set(full_data.map(d => d.DISTRICT))];
@@ -21,20 +21,25 @@ export default function bodyCamera(full_data) {
       total: parseInt(body_cam[0].y) + parseInt(body_cam[1].y)
     };
   }
-
-  var stack = stack().keys(["N", "Y"]);
-
+  var stacker = stack()
+    .keys(["N", "Y"])
+    .order(stackOrderDescending);
+  console.log(stacker(data));
+  var series = stacker(data);
   var height = 900;
   var width = 800;
   var margin = { top: 20, right: 15, bottom: 25, left: 25 };
-  width = width - margin.left - margin.right;
+  width = width - margin.hleft - margin.right;
   height = height - margin.top - margin.bottom;
+  var yScale = scaleBand()
+    .domain(range(data.length))
+    .range([0, width])
+    .paddingInner(0.05);
 
-  var x = scaleLinear().range([margin.left, width - margin.right]);
-  var y = scaleBand()
-    .domain(data.map(d => d.district))
-    .range([margin.top, height - margin.bottom])
-    .padding(0.08);
+  var xScale = scaleLinear()
+    .domain([0, Math.max(...data.map(d => d.N + d.Y))])
+    .range([height, 0]);
+
   var color = scaleOrdinal()
     .domain(["N", "Y"])
     .range([schemeSpectral[0], schemeSpectral[2]])
