@@ -39,3 +39,14 @@ body {
   text-align: center;
 }
 
+#dist-legend{
+  display: inline-block;
+}
+
+table{
+  display: inline-block;
+}
+
+td{
+  max-height: 20px
+}

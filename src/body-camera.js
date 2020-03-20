@@ -33,6 +33,8 @@ export default function bodyCamera(full_data) {
     width = +svg.attr("width") - margin.left - margin.right,
     height = +svg.attr("height") - margin.top - margin.bottom,
     g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+  
+  
 
   var y = scaleBand()			// x = d3.scaleBand()	
     .rangeRound([0, height])	// .rangeRound([0, width])
@@ -42,7 +44,7 @@ export default function bodyCamera(full_data) {
   var x = scaleLinear()		// y = d3.scaleLinear()
     .rangeRound([0, width]);	// .rangeRound([height, 0]);
 
-    var z = scaleOrdinal()
+  var z = scaleOrdinal()
     .range(["#98abc5", "#8a89a6"]);
 
   y.domain(data.map(function (d) { return d.district; }));					// x.domain...
@@ -88,7 +90,6 @@ export default function bodyCamera(full_data) {
     .selectAll("g")
     .data(["N", "Y"])
     .enter().append("g")
-    //.attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
     .attr("transform", function (d, i) { return "translate(-50," + (300 + i * 20) + ")"; });
 
   legend.append("rect")
@@ -102,4 +103,6 @@ export default function bodyCamera(full_data) {
     .attr("y", 9.5)
     .attr("dy", "0.32em")
     .text(function (d) { return d; });
+
+
 }

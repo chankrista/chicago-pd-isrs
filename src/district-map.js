@@ -6,6 +6,7 @@ import { extent, quantile } from "d3-array";
 import { schemeBlues, schemeOranges } from "d3-scale-chromatic";
 import { bodyCamera } from "./body-camera.js";
 import summaryStats from "./summary-stats.js";
+import { legendColor } from "d3-svg-legend";
 
 export default function districtMap(data, crimes, districts, isrs) {
   //add a time frame filter here once that's figured out.
@@ -16,7 +17,7 @@ export default function districtMap(data, crimes, districts, isrs) {
   }
 
   // Width and Height of the whole visualization
-  var width = 600;
+  var width = 500;
   var height = 540;
 
   var svg = select(isrs ? "#map-isrs" : "#map-crimes")
@@ -49,7 +50,7 @@ export default function districtMap(data, crimes, districts, isrs) {
     .data(districts.features)
     .enter()
     .append("path")
-    .attr("fill", function(d) {
+    .attr("fill", function (d) {
       return color(
         dist_data.filter(row => row.x == d.properties.dist_num)[0].y
       );
@@ -59,7 +60,7 @@ export default function districtMap(data, crimes, districts, isrs) {
     .attr("stroke-opacity", 0.5)
     .attr("stroke-width", 1)
     .attr("class", d => d.properties.dist_label)
-    .on("click", function(d) {
+    .on("click", function (d) {
       selectAll("path")
         .attr("stroke-opacity", 0.5)
         .attr("stroke-width", 1);
@@ -75,4 +76,39 @@ export default function districtMap(data, crimes, districts, isrs) {
       summaryStats(d.properties.dist_num, data, crimes, dist_geo);
       //add code to highlight bar chart
     });
+
+  var increment = (color_max - color_min) / 9;
+  var current_val = color_min;
+  var y_legend = 300;
+  for (let i = 0; i < color_scheme.length; i++) {
+    svg.append("rect")
+      .attr("fill", color_scheme[i])
+      .attr("width", 10)
+      .attr("height", 10)
+      .attr("x", 70)
+      .attr("y", y_legend)
+
+    svg.append("text")
+      .text("<" + current_val.toFixed(0))
+      .attr("x", 85)
+      .attr("y", y_legend + 10)
+      .attr("font-size", "8px")
+
+    current_val += increment;
+    y_legend += 15;
+  }
+
+
+
+  // svg.append("g")
+  //   .attr("class", "legendLinear")
+  //   .attr("transform", "translate(20,20)");  
+
+  // var legendLinear = legendColor()
+  //   .shapeWidth(30)
+  //   .orient('horizontal')
+  //   .scale(color);
+
+  // svg.select(".legendLinear")
+  //   .call(legendLinear);
 }

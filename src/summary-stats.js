@@ -4,7 +4,7 @@ import { schemeDark2 } from "d3-scale-chromatic";
 import { pie, arc } from "d3-shape";
 import { scaleOrdinal } from "d3-scale";
 
-export default function summaryStats(dist, isrs, crimes, dist_geo) {
+export default function summaryStats(dist, isrs, crimes) {
 
   var time_data = isrs.filter(row => row.year === "2018");
   var time_isrs = groupBy(time_data, "year")[0].y;
@@ -12,15 +12,30 @@ export default function summaryStats(dist, isrs, crimes, dist_geo) {
   var time_crimes_data = crimes.filter(row => row.year === "2018");
   var time_crimes = groupBy(time_crimes_data, "year")[0].y;
 
-  var dist_isrs = groupBy(time_data, "DISTRICT")[0].y;
-  var dist_crimes_data = time_crimes_data.filter(row => row.district == dist);
-  var dist_crimes = groupBy(dist_crimes_data, "district")[0].y;
+  if (dist === 0) {
+    var dist_isrs = time_isrs;
+    var dist_crimes_data = time_crimes_data;
+    var dist_crimes = time_crimes;
+    var dist_name = "the city of Chicago";
+    var dist_time_data = time_data
+  } else {
+    var dist_time_data = time_data.filter(row => row.DISTRICT === dist);
+    var dist_isrs = groupBy(dist_time_data, "DISTRICT")[0].y;
+    var dist_crimes_data = time_crimes_data.filter(row => row.district == dist);
+    var dist_crimes = groupBy(dist_crimes_data, "district")[0].y;
+    var dist_name = "district " + dist;
+    
+  }
+  var dist_grouped = groupBy(dist_time_data, "BODY_CAMERA_I");
+  var dist_grouped = [dist_grouped[1], dist_grouped[0]];
 
+  document.getElementById("summary_isrs").innerHTML = "";
+  document.getElementById("summary_crimes").innerHTML = "";
   select("#summary_isrs").html(
     "<p>In 2018, there were <b>" +
     dist_isrs +
-    " ISRs</b> in district " +
-    dist +
+    " ISRs</b> in " +
+    dist_name +
     ",<br>which is <b>" +
     Math.round((dist_isrs / time_isrs) * 100) +
     "%</b> of the citywide total.</p>"
@@ -35,13 +50,13 @@ export default function summaryStats(dist, isrs, crimes, dist_geo) {
     "%</b> of the citywide total.</p>"
   );
 
-  var dist_time_data = time_data.filter(row => row.DISTRICT === dist && row.year === "2018");
-  console.log(dist_time_data);
-  var dist_grouped = groupBy(dist_time_data, "BODY_CAMERA_I");
-  console.log(dist_grouped);
+  
 
-  var w = 300;
-  var h = 300;
+  var height = 300;
+  var width = 300;
+  var margin = { top: 20, right: 20, bottom: 20, left: 20 };
+  var w = width - margin.left - margin.right;
+  var h = height - margin.top - margin.bottom;
 
   var outerRadius = w / 2;
   var innerRadius = w / 3;
@@ -53,13 +68,40 @@ export default function summaryStats(dist, isrs, crimes, dist_geo) {
 
   //Easy colors accessible via a 10-step ordinal scale
   var color = scaleOrdinal(schemeDark2);
-  
-  document.getElementById("body-cameras").innerHTML = "<h3>Body Camera Use</h3><h5>Proportion of stops recorded by a body camera.</h5>"
+  console.log(color);
+  console.log(schemeDark2[0]);
+
+  document.getElementById("body-cameras").innerHTML = `<h3>Body Camera Use</h3>
+    <h5>ISRs recorded by a body camera.</h5>
+    <table>
+      <tr>
+        <td>
+          <svg width="10" height="20">
+            <rect width="10" height="10" style="fill:` + schemeDark2[0] + `;" />
+          </svg>
+        </td>
+        <td>
+          Yes
+        </td>        
+      </tr>
+      <tr>
+        <td>
+          <svg width="10" height="20">
+            <rect width="10" height="10" style="fill:` + schemeDark2[1] + `;" />
+          </svg>
+        </td>
+        <td>
+          No
+        </td>        
+      </tr> 
+    </table>`
+
   //Create SVG element
   var svg = select("#body-cameras")
     .append("svg")
     .attr("width", w)
-    .attr("height", h);
+    .attr("height", height)
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
   //Set up groups
   var arcs = svg.selectAll("g.arc")

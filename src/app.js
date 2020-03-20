@@ -6,8 +6,7 @@ import { csv, json } from "d3-fetch";
 import "./stylesheets/main.css";
 import lineChart from "./line-chart";
 import districtMap from "./district-map.js";
-import slopeGraph from "./slope-graph.js";
-import bodyCamera from "./body-camera.js";
+import summaryStats from "./summary-stats.js"
 
 // this will make your loading process 1 million times faster
 const prefix = window.location.origin.startsWith("http://localhost:")
@@ -31,8 +30,7 @@ function app(data, crimes, districts) {
     districtMap(data, crimes, districts, true);
     districtMap(data, crimes, districts, false);
     lineChart(data);
-    //slopeGraph(data, crimes);
-    //bodyCamera(data);
+    summaryStats(0, data, crimes);
   }
   render();
 }

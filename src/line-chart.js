@@ -62,6 +62,21 @@ export default function lineChart(d) {
       return lineScale(d);
     });
 
+  for (let i=0; i<data.length; i++){
+    svg
+      .selectAll(".circle")
+      .data([data], d => d)
+      .enter()
+      .append("circle")
+      .attr("class", d => d[i].x)
+      .attr("r", "5")
+      .attr("cx", d => x(d[i].x))
+      .attr("cy", d => y(d[i].y))
+      .attr("fill", "steelblue")
+  }
+
+
+
   // var d_time = d.map(function(row){
   //     return {time_frame: row.CONTACT_DATE.getFullYear()};
   // });
