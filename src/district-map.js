@@ -16,8 +16,8 @@ export default function districtMap(data, crimes, districts, isrs) {
   }
 
   // Width and Height of the whole visualization
-  var width = 700;
-  var height = 580;
+  var width = 600;
+  var height = 540;
 
   var svg = select(isrs ? "#map-isrs" : "#map-crimes")
     .append("svg")
@@ -30,8 +30,8 @@ export default function districtMap(data, crimes, districts, isrs) {
 
   var albersProjection = geoAlbers()
     .scale(70000)
-    .rotate([87.6416, 0])
-    .center([0, 41.8779])
+    .rotate([87.7516, 0])
+    .center([0, 41.8389])
     .translate([width / 2, height / 2]);
 
   var path_fn = geoPath().projection(albersProjection);
@@ -71,6 +71,7 @@ export default function districtMap(data, crimes, districts, isrs) {
       var dist_geo = districts.features.filter(
         row => row.properties.dist_num == d.properties.dist_num
       );
+      document.getElementById("body-cameras").innerHTML = "";
       summaryStats(d.properties.dist_num, data, crimes, dist_geo);
       //add code to highlight bar chart
     });

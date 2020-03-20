@@ -30,9 +30,9 @@ function app(data, crimes, districts) {
   function render() {
     districtMap(data, crimes, districts, true);
     districtMap(data, crimes, districts, false);
-    //lineChart(data);
+    lineChart(data);
     //slopeGraph(data, crimes);
-    bodyCamera(data);
+    //bodyCamera(data);
   }
   render();
 }

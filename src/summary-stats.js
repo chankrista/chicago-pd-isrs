@@ -1,101 +1,89 @@
 import { select } from "d3-selection";
-import { geoAlbers, geoPath } from "d3-geo";
-import pctChart from "./pct-summary.js";
 import { groupBy } from "./utils";
+import { schemeDark2 } from "d3-scale-chromatic";
+import { pie, arc } from "d3-shape";
+import { scaleOrdinal } from "d3-scale";
 
 export default function summaryStats(dist, isrs, crimes, dist_geo) {
-  console.log(isrs);
-  console.log(crimes);
+
   var time_data = isrs.filter(row => row.year === "2018");
   var time_isrs = groupBy(time_data, "year")[0].y;
 
   var time_crimes_data = crimes.filter(row => row.year === "2018");
   var time_crimes = groupBy(time_crimes_data, "year")[0].y;
-  var dist_data = time_data.filter(row => row.DISTRICT == dist);
+
   var dist_isrs = groupBy(time_data, "DISTRICT")[0].y;
   var dist_crimes_data = time_crimes_data.filter(row => row.district == dist);
   var dist_crimes = groupBy(dist_crimes_data, "district")[0].y;
 
-  console.log(time_isrs, time_crimes, dist_isrs, dist_crimes);
   select("#summary_isrs").html(
     "<p>In 2018, there were <b>" +
-      dist_isrs +
-      " ISRs</b> in district " +
-      dist +
-      ", which is <b>" +
-      Math.round((dist_isrs / time_isrs) * 100) +
-      "%</b> of the citywide total.</p>"
+    dist_isrs +
+    " ISRs</b> in district " +
+    dist +
+    ",<br>which is <b>" +
+    Math.round((dist_isrs / time_isrs) * 100) +
+    "%</b> of the citywide total.</p>"
   );
   select("#summary_crimes").html(
     "<p>In 2018, there were <b>" +
-      dist_crimes +
-      " crimes</b> in district " +
-      dist +
-      ", which is <b>" +
-      Math.round((dist_crimes / time_crimes) * 100) +
-      "%</b> of the citywide total.</p>"
+    dist_crimes +
+    " crimes</b> in district " +
+    dist +
+    ",<br>which is <b>" +
+    Math.round((dist_crimes / time_crimes) * 100) +
+    "%</b> of the citywide total.</p>"
   );
-  var width = 500;
-  var height = 500;
-  select("#district-map")
-    .selectAll("*")
-    .remove();
-  var svg = select("#district-map")
+
+  var dist_time_data = time_data.filter(row => row.DISTRICT === dist && row.year === "2018");
+  console.log(dist_time_data);
+  var dist_grouped = groupBy(dist_time_data, "BODY_CAMERA_I");
+  console.log(dist_grouped);
+
+  var w = 300;
+  var h = 300;
+
+  var outerRadius = w / 2;
+  var innerRadius = w / 3;
+  var arc_func = arc()
+    .innerRadius(innerRadius)
+    .outerRadius(outerRadius);
+
+  var pie_func = pie();
+
+  //Easy colors accessible via a 10-step ordinal scale
+  var color = scaleOrdinal(schemeDark2);
+  
+  document.getElementById("body-cameras").innerHTML = "<h3>Body Camera Use</h3><h5>Proportion of stops recorded by a body camera.</h5>"
+  //Create SVG element
+  var svg = select("#body-cameras")
     .append("svg")
-    .attr("width", width)
-    .attr("height", height);
-  var g = svg.append("g");
-  // turf geopackage. method called center, center of mass, centroid
-  //NEED TO FIGURE OUT A WAY TO GET CENTROIDS
-  // Append empty placeholder g element to the SVG
-  // g will contain geometry elements
-  //
-  // console.log(dist_geo[0].geometry.coordinates[0]);
-  //   function find_min(coords, min) {
-  //     if ((typeof coords[0] == 'number') & (coords[0] < min)) {
-  //       return coords[0];
-  //     } else if (typeof coords[0] == 'number') {
-  //       return min;
-  //     }
-  //     for (var i = 0; i < coords.length; i++) {
-  //       find_min(coords[i], min);
-  //     }
-  //   }
-  //   var coord_x = find_min(dist_geo[0].geometry.coordinates, 0);
-  //   console.log(coord_x);
-  //   var coord_y = dist_geo[0].geometry.coordinates.map(y =>
-  //     find_centroid(y, false),
-  //   );
-  // var min_x = 90;
-  // for (var i = 0; i < dist_geo[0].geometry.coordinates[0]; i++) {
-  //   if (dist_geo[0].geometry.coordinates[0][i][0] < min_x) {
-  //     min_x = dist_geo[0].geometry.coordinates[0][i][0];
-  //   }
-  // }
-  // console.log(min_x);
-  // console.log(...dist_geo[0].geometry.coordinates[0].map(x => x[0][0]));
-  // var min_x = Math.min(...dist_geo[0].geometry.coordinates[0].map(x => x[0]));
-  // console.log(min_x);
-  // var max_x = Math.max(coord_x);
-  // var min_y = Math.min(coord_y);
-  // var max_y = Math.max(coord_y);
+    .attr("width", w)
+    .attr("height", h);
 
-  var albersProjection = geoAlbers()
-    .scale(70000)
-    .rotate([87.6416, 0])
-    .center([0, 41.8779])
-    .translate([width / 2, height / 2]);
-
-  var path_fn = geoPath().projection(albersProjection);
-
-  g.selectAll("path")
-    .data(dist_geo)
+  //Set up groups
+  var arcs = svg.selectAll("g.arc")
+    .data(pie_func(dist_grouped.map(d => d.y)))
     .enter()
-    .append("path")
-    .attr("stroke", "#333")
-    .attr("d", path_fn)
-    .attr("stroke-opacity", 0.5)
-    .attr("stroke-width", 1);
+    .append("g")
+    .attr("class", "arc")
+    .attr("transform", "translate(" + outerRadius + "," + outerRadius + ")");
 
-  pctChart(dist_data, dist_isrs, time_data, time_isrs);
+  //Draw arc paths
+  arcs.append("path")
+    .attr("fill", function (d, i) {
+      return color(i);
+    })
+    .attr("d", arc_func);
+
+  //Labels
+  arcs.append("text")
+    .attr("transform", function (d) {
+      return "translate(" + arc_func.centroid(d) + ")";
+    })
+    .attr("text-anchor", "middle")
+    .text(function (d) {
+      return d.value;
+    });
+
 }

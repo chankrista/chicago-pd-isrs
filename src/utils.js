@@ -22,7 +22,7 @@ export function getCounts(data, key_field) {
 }
 
 export function groupBy(d, key) {
-  console.log(d, key);
+
   var groups = {};
   for (let i = 0; i < d.length; i++) {
     var current_val = parseInt(d[i].count);

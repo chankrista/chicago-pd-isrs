@@ -2,9 +2,10 @@ import { groupBy } from "./utils";
 import { select } from "d3-selection";
 import { scaleBand, scaleLinear, scaleOrdinal } from "d3-scale";
 import { stack, stackOrderDescending } from "d3-shape";
-import { slice } from "d3-array";
-import { schemeSpectral } from "d3-scale-chromatic";
-import { axisLeft, axisTop, range } from "d3-axis";
+import { slice, range, max } from "d3-array";
+import { schemeCategory10 } from "d3-scale-chromatic";
+import { axisLeft, axisBottom } from "d3-axis";
+
 
 export default function bodyCamera(full_data) {
   var districts = [...new Set(full_data.map(d => d.DISTRICT))];
@@ -24,66 +25,81 @@ export default function bodyCamera(full_data) {
   var stacker = stack()
     .keys(["N", "Y"])
     .order(stackOrderDescending);
-  console.log(stacker(data));
+
   var series = stacker(data);
-  var height = 900;
-  var width = 800;
-  var margin = { top: 20, right: 15, bottom: 25, left: 25 };
-  width = width - margin.hleft - margin.right;
-  height = height - margin.top - margin.bottom;
-  var yScale = scaleBand()
-    .domain(range(data.length))
-    .range([0, width])
-    .paddingInner(0.05);
+  console.log(series);
+  var svg = select("#body-cameras"),
+    margin = { top: 20, right: 20, bottom: 30, left: 40 },
+    width = +svg.attr("width") - margin.left - margin.right,
+    height = +svg.attr("height") - margin.top - margin.bottom,
+    g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-  var xScale = scaleLinear()
-    .domain([0, Math.max(...data.map(d => d.N + d.Y))])
-    .range([height, 0]);
+  var y = scaleBand()			// x = d3.scaleBand()	
+    .rangeRound([0, height])	// .rangeRound([0, width])
+    .paddingInner(0.05)
+    .align(0.1);
 
-  var color = scaleOrdinal()
-    .domain(["N", "Y"])
-    .range([schemeSpectral[0], schemeSpectral[2]])
-    .unknown("#ccc");
+  var x = scaleLinear()		// y = d3.scaleLinear()
+    .rangeRound([0, width]);	// .rangeRound([height, 0]);
 
-  var svg = select("#body-cameras")
-    .append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-    .append("g")
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    var z = scaleOrdinal()
+    .range(["#98abc5", "#8a89a6"]);
 
-  var xAxis = function(g) {
-    g.attr("transform", `translate(0,${margin.top})`)
-      .call(axisTop(x).ticks(width / 100, "%"))
-      .call(g => g.selectAll(".domain").remove());
-  };
-  var yAxis = function(g) {
-    g.attr("transform", `translate(${margin.left},0)`)
-      .call(axisLeft(y).tickSizeOuter(0))
-      .call(g => g.selectAll(".domain").remove());
-  };
+  y.domain(data.map(function (d) { return d.district; }));					// x.domain...
+  x.domain([0, max(data, function (d) { return d.total; })]).nice();	// y.domain...
+  z.domain(["N", "Y"]);
 
-  svg
+  g.append("g")
     .selectAll("g")
-    .append("g")
-    .data(data)
-    .enter()
-    .attr("fill", d => color(d.key))
-    .append("g")
+    .data(series)
+    .enter().append("g")
+    .attr("fill", function (d) { return z(d.key); })
     .selectAll("rect")
-    .data(d => d)
-    .join("rect")
-    .attr("x", d => x(d[0]))
-    .attr("y", (d, i) => y(d.data.name))
-    .attr("width", d => x(d[1]) - x(d[0]))
-    .attr("height", y.bandwidth())
-    .append("title")
-    .text(
-      d => `${d.data.name} ${d.key}
-        ${formatPercent(d[1] - d[0])} (${formatValue(d.data[d.key])})`
-    );
+    .data(function (d) { return d; })
+    .enter().append("rect")
+    .attr("y", function (d) { return y(d.data.district); })	    //.attr("x", function(d) { return x(d.data.State); })
+    .attr("x", function (d) { return x(d[0]); })			    //.attr("y", function(d) { return y(d[1]); })	
+    .attr("width", function (d) { return x(d[1]) - x(d[0]); })	//.attr("height", function(d) { return y(d[0]) - y(d[1]); })
+    .attr("height", y.bandwidth());						    //.attr("width", x.bandwidth());	
 
-  svg.append("g").call(xAxis);
+  g.append("g")
+    .attr("class", "axis")
+    .attr("transform", "translate(0,0)") 						//  .attr("transform", "translate(0," + height + ")")
+    .call(axisLeft(y));									//   .call(d3.axisBottom(x));
 
-  svg.append("g").call(yAxis);
+  g.append("g")
+    .attr("class", "axis")
+    .attr("transform", "translate(0," + height + ")")				// New line
+    .call(axisBottom(x).ticks(null, "s"))					//  .call(d3.axisLeft(y).ticks(null, "s"))
+    .append("text")
+    .attr("y", 2)												//     .attr("y", 2)
+    .attr("x", x(x.ticks().pop()) + 0.5) 						//     .attr("y", y(y.ticks().pop()) + 0.5)
+    .attr("dy", "0.32em")										//     .attr("dy", "0.32em")
+    .attr("fill", "#000")
+    .attr("font-weight", "bold")
+    .attr("text-anchor", "start")
+    .text("Population")
+    .attr("transform", "translate(" + (-width) + ",-10)");   	// Newline
+
+  var legend = g.append("g")
+    .attr("font-family", "sans-serif")
+    .attr("font-size", 10)
+    .attr("text-anchor", "end")
+    .selectAll("g")
+    .data(["N", "Y"])
+    .enter().append("g")
+    //.attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
+    .attr("transform", function (d, i) { return "translate(-50," + (300 + i * 20) + ")"; });
+
+  legend.append("rect")
+    .attr("x", width - 19)
+    .attr("width", 19)
+    .attr("height", 19)
+    .attr("fill", z);
+
+  legend.append("text")
+    .attr("x", width - 24)
+    .attr("y", 9.5)
+    .attr("dy", "0.32em")
+    .text(function (d) { return d; });
 }

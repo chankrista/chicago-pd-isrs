@@ -9,7 +9,7 @@ import { timeFormat, timeParse } from "d3-time-format";
 export default function lineChart(d) {
   var height = 300;
   var width = 800;
-  var margin = { top: 20, right: 15, bottom: 25, left: 25 };
+  var margin = { top: 20, right: 15, bottom: 50, left: 25 };
   width = width - margin.left - margin.right;
   height = height - margin.top - margin.bottom;
   var svg = select("#line-graph")
@@ -18,9 +18,8 @@ export default function lineChart(d) {
     .attr("height", height + margin.top + margin.bottom)
     .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
   var data = groupBy(d, "month_year");
-  var parseTime = timeParse("%Y-%m-%d");
+  var parseTime = timeParse("%m/%d/%Y");
   var data = data
     .map(d => ({ x: parseTime(d.x), y: d.y }))
     .sort((a, b) => {
@@ -35,6 +34,12 @@ export default function lineChart(d) {
     .append("g")
     .attr("transform", "translate(0, " + height + ")")
     .call(axisBottom(x));
+  svg
+    .append("text")
+    .attr("x", width/2)
+    .attr("y", height + 30)
+    .attr("class", "axis-label")
+    .text("Month of ISR");
   console.log("domain", [0, max(data.map(d => d.y))]);
   var y = scaleLinear()
     .domain([0, max(data.map(d => d.y))])
@@ -44,7 +49,7 @@ export default function lineChart(d) {
   const lineScale = line()
     .x(d => x(d.x))
     .y(d => y(d.y));
-
+  console.log("here", data);
   svg
     .selectAll("path")
     .data([data], d => d)
