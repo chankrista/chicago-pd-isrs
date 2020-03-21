@@ -14,12 +14,13 @@ const prefix = window.location.origin.startsWith("http://localhost:")
   : // you should modify this link when you figure out what the new appropriate raw data source is for this repo
   "https://raw.githubusercontent.com/chankrista/chicago-pd-isrs/master";
 domReady(() => {
-  Promis.all([
+  Promise.all([
     csv(`${prefix}/data/isrs_clean.csv`),
     csv(`${prefix}/data/crimes_16-18.csv`),
     // i changed the name of this file
     json(`${prefix}/data/Boundaries-PoliceDistricts(current).geojson`)
   ]).then(d => {
+    console.log("this updated");
     const [data, crimes, districts] = d;
     app(data, crimes, districts);
   });
