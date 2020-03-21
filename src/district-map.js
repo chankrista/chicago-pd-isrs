@@ -6,7 +6,8 @@ import { extent, quantile } from "d3-array";
 import { schemeBlues, schemeOranges } from "d3-scale-chromatic";
 import { bodyCamera } from "./body-camera.js";
 import summaryStats from "./summary-stats.js";
-import { legendColor } from "d3-svg-legend";
+import lineChart from "./line-chart";
+
 
 export default function districtMap(data, crimes, districts, isrs) {
   //add a time frame filter here once that's figured out.
@@ -74,6 +75,8 @@ export default function districtMap(data, crimes, districts, isrs) {
       );
       document.getElementById("body-cameras").innerHTML = "";
       summaryStats(d.properties.dist_num, data, crimes, dist_geo);
+      var dist_data = data.filter(row => row.DISTRICT === d.properties.dist_num);
+      lineChart(dist_data);
       //add code to highlight bar chart
     });
 

@@ -24,7 +24,7 @@ export default function summaryStats(dist, isrs, crimes) {
     var dist_crimes_data = time_crimes_data.filter(row => row.district == dist);
     var dist_crimes = groupBy(dist_crimes_data, "district")[0].y;
     var dist_name = "district " + dist;
-    
+
   }
   var dist_grouped = groupBy(dist_time_data, "BODY_CAMERA_I");
   var dist_grouped = [dist_grouped[1], dist_grouped[0]];
@@ -50,10 +50,10 @@ export default function summaryStats(dist, isrs, crimes) {
     "%</b> of the citywide total.</p>"
   );
 
-  
 
-  var height = 300;
-  var width = 300;
+
+  var height = 180;
+  var width = 180;
   var margin = { top: 20, right: 20, bottom: 20, left: 20 };
   var w = width - margin.left - margin.right;
   var h = height - margin.top - margin.bottom;
@@ -68,11 +68,11 @@ export default function summaryStats(dist, isrs, crimes) {
 
   //Easy colors accessible via a 10-step ordinal scale
   var color = scaleOrdinal(schemeDark2);
-  console.log(color);
-  console.log(schemeDark2[0]);
+
+  var pct_recorded = ((dist_grouped[0].y / (dist_grouped[0].y + dist_grouped[1].y)) * 100).toFixed(2)
 
   document.getElementById("body-cameras").innerHTML = `<h3>Body Camera Use</h3>
-    <h5>ISRs recorded by a body camera.</h5>
+    <h5>` + pct_recorded + `% of ISRs were recorded by a body camera in ` + dist_name + `.</h5>
     <table>
       <tr>
         <td>

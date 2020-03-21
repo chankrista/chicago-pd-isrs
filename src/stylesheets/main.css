@@ -2,6 +2,10 @@
   margin: 20px;
 }
 
+#top-row{
+  display: flex
+}
+
 #app {
   display: inline-block;
 }

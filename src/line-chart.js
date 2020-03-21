@@ -5,13 +5,15 @@ import { extent, max, min } from "d3-array";
 import { line, curveMonotoneX } from "d3-shape";
 import { groupBy } from "./utils";
 import { timeFormat, timeParse } from "d3-time-format";
+import districtMap from "./district-map";
 
-export default function lineChart(d) {
-  var height = 300;
-  var width = 800;
+export default function lineChart(d, c, districts) {
+  var height = 200;
+  var width = 600;
   var margin = { top: 20, right: 15, bottom: 50, left: 25 };
   width = width - margin.left - margin.right;
   height = height - margin.top - margin.bottom;
+  document.getElementById("line-graph").innerHTML = "";
   var svg = select("#line-graph")
     .append("svg")
     .attr("width", width + margin.left + margin.right)
@@ -40,7 +42,7 @@ export default function lineChart(d) {
     .attr("y", height + 30)
     .attr("class", "axis-label")
     .text("Month of ISR");
-  console.log("domain", [0, max(data.map(d => d.y))]);
+
   var y = scaleLinear()
     .domain([0, max(data.map(d => d.y))])
     .range([height, 0]);
@@ -73,6 +75,15 @@ export default function lineChart(d) {
       .attr("cx", d => x(d[i].x))
       .attr("cy", d => y(d[i].y))
       .attr("fill", "steelblue")
+      .on("click", function(row){
+        console.log(row[i].x);
+        var time_data = d.filter(function(a){
+          console.log(parseTime(a.month_year));
+          return parseTime(a.month_year) == row[i].x
+        });
+        console.log(time_data);
+        //districtMap(d, c, districts, true)
+      })
   }
 
 

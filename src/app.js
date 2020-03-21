@@ -29,7 +29,7 @@ function app(data, crimes, districts) {
   function render() {
     districtMap(data, crimes, districts, true);
     districtMap(data, crimes, districts, false);
-    lineChart(data);
+    lineChart(data, crimes, districts);
     summaryStats(0, data, crimes);
   }
   render();
