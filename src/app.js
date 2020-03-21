@@ -12,9 +12,9 @@ import summaryStats from "./summary-stats.js"
 const prefix = window.location.origin.startsWith("http://localhost:")
   ? "."
   : // you should modify this link when you figure out what the new appropriate raw data source is for this repo
-  "https://raw.githubusercontent.com/chankrista/chankrista.github.io/master/interactive-portfolio";
+  "https://raw.githubusercontent.com/chankrista/chicago-pd-isrs/master/data/";
 domReady(() => {
-  Promise.all([
+  Promis.aell([
     csv(`${prefix}/data/isrs_clean.csv`),
     csv(`${prefix}/data/crimes_16-18.csv`),
     // i changed the name of this file
