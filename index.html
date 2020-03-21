@@ -13,29 +13,31 @@
     <h1>
       Investigatory Stop Reports by the Chicago Police Department 2016-2018
     </h1>
-    <h7>Data presented below are based on <a href="https://home.chicagopolice.org/statistics-data/isr-data/">2016-2017</a> and <a href="home.chicagopolice.org/isr-data-2018/">2018</a> files available on the Chicago Police Department's website.</h7>
+    
     <div id="app">
       <div id="mid">
 
-          <div id="time-trend">
-            <div id="line-graph"></div>
+          <div id="top-row">
+            <div id="line-graph-outer"><h3>ISRs per month</h3><div id="line-graph"></div></div>
+            <div id="body-cameras"></div>
           </div>
 
           <div id="maps">
             <div class="map">
-              <h3>ISRs</h3>
+              <h3>ISRs by District</h3>
               <div id="map-isrs"></div>
               <div id="summary_isrs"></div>
             </div>
             <div class="map">
-              <h3>Crimes</h3>
+              <h3>Crimes by District</h3>
               <div id="map-crimes"></div>
               <div id="summary_crimes"></div>
             </div>
           </div>
       </div>
-      <div id="body-cameras"></div>
+      
     </div>
+    <p>*Data presented are based on <a href="https://home.chicagopolice.org/statistics-data/isr-data/">2016-2017</a> and <a href="home.chicagopolice.org/isr-data-2018/">2018</a> files available on the Chicago Police Department's website.</p>
     <script src="bundle.js"></script>
   </body>
 </html>
