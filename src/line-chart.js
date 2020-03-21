@@ -6,8 +6,10 @@ import { line, curveMonotoneX } from "d3-shape";
 import { groupBy } from "./utils";
 import { timeFormat, timeParse } from "d3-time-format";
 import districtMap from "./district-map";
+import summaryStats from "./summary-stats";
 
-export default function lineChart(d, c, districts) {
+export default function lineChart(data_full, c, districts) {
+
   var height = 200;
   var width = 600;
   var margin = { top: 20, right: 15, bottom: 50, left: 25 };
@@ -20,7 +22,7 @@ export default function lineChart(d, c, districts) {
     .attr("height", height + margin.top + margin.bottom)
     .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-  var data = groupBy(d, "month_year");
+  var data = groupBy(data_full, "month_year");
   var parseTime = timeParse("%m/%d/%Y");
   var data = data
     .map(d => ({ x: parseTime(d.x), y: d.y }))
@@ -31,14 +33,13 @@ export default function lineChart(d, c, districts) {
   var x = scaleTime()
     .domain(extent(data, d => d.x))
     .range([0, width]);
-  console.log("x", x);
   svg
     .append("g")
     .attr("transform", "translate(0, " + height + ")")
     .call(axisBottom(x));
   svg
     .append("text")
-    .attr("x", width/2)
+    .attr("x", width / 2)
     .attr("y", height + 30)
     .attr("class", "axis-label")
     .text("Month of ISR");
@@ -51,7 +52,7 @@ export default function lineChart(d, c, districts) {
   const lineScale = line()
     .x(d => x(d.x))
     .y(d => y(d.y));
-  console.log("here", data);
+
   svg
     .selectAll("path")
     .data([data], d => d)
@@ -64,7 +65,7 @@ export default function lineChart(d, c, districts) {
       return lineScale(d);
     });
 
-  for (let i=0; i<data.length; i++){
+  for (let i = 0; i < data.length; i++) {
     svg
       .selectAll(".circle")
       .data([data], d => d)
@@ -75,14 +76,33 @@ export default function lineChart(d, c, districts) {
       .attr("cx", d => x(d[i].x))
       .attr("cy", d => y(d[i].y))
       .attr("fill", "steelblue")
-      .on("click", function(row){
-        console.log(row[i].x);
-        var time_data = d.filter(function(a){
-          console.log(parseTime(a.month_year));
-          return parseTime(a.month_year) == row[i].x
-        });
-        console.log(time_data);
-        //districtMap(d, c, districts, true)
+      .on("click", function (row) {
+        var circles = document.getElementsByTagName("circle");
+        for (let i = 0; i < circles.length; i++) {
+          circles[i].setAttribute("stroke", "");
+          circles[i].setAttribute("stroke-width", 0);
+        }
+        var circle = document.getElementsByClassName(row[i].x)[0];
+        circle.setAttribute("stroke", "gray");
+        circle.setAttribute("stroke-width", 3);
+
+        // .attr("stroke", "gray")
+        // .attr("stroke-width", 3)
+        var crimeParse = timeParse("%Y-%m");
+        var crime_data = c.filter(a => String(crimeParse(a.month_year)) === String(row[i].x));
+        var time_data = data_full.filter(a => String(parseTime(a.month_year)) === String(row[i].x));
+        var dists = new Set(time_data.map(r => r.DISTRICT));
+        var dates = new Set(time_data.map(r => r.month_year));
+        var date_true = dates.size == 1;
+        var dist_true = dists.size == 1;
+        if (date_true && dist_true) {
+          alert("Time and district filters cannot both be applied. Page must reload!")
+          location.reload();
+        } else {
+          districtMap(time_data, crime_data, districts, true);
+          districtMap(time_data, crime_data, districts, false);
+          summaryStats(0, time_data, crime_data, time_data[0].month_year)
+        }
       })
   }
 

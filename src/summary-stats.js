@@ -3,13 +3,22 @@ import { groupBy } from "./utils";
 import { schemeDark2 } from "d3-scale-chromatic";
 import { pie, arc } from "d3-shape";
 import { scaleOrdinal } from "d3-scale";
+import { timeParse, timeFormat } from "d3-time-format";
 
-export default function summaryStats(dist, isrs, crimes) {
+export default function summaryStats(dist, isrs, crimes, time = "2016-2018") {
 
-  var time_data = isrs.filter(row => row.year === "2018");
+  if (time === "2016-2018") {
+    var time_clean = time;
+  } else {
+    var date_parse = timeParse("%m/%d/%Y")
+    var format = timeFormat("%b %Y")
+    var time_clean = format(date_parse(time));
+  }
+  var time_data = isrs;
+  var time_crimes_data = crimes;
+
+
   var time_isrs = groupBy(time_data, "year")[0].y;
-
-  var time_crimes_data = crimes.filter(row => row.year === "2018");
   var time_crimes = groupBy(time_crimes_data, "year")[0].y;
 
   if (dist === 0) {
@@ -32,7 +41,7 @@ export default function summaryStats(dist, isrs, crimes) {
   document.getElementById("summary_isrs").innerHTML = "";
   document.getElementById("summary_crimes").innerHTML = "";
   select("#summary_isrs").html(
-    "<p>In 2018, there were <b>" +
+    "<p>In " + time_clean + ", there were <b>" +
     dist_isrs +
     " ISRs</b> in " +
     dist_name +
@@ -41,7 +50,7 @@ export default function summaryStats(dist, isrs, crimes) {
     "%</b> of the citywide total.</p>"
   );
   select("#summary_crimes").html(
-    "<p>In 2018, there were <b>" +
+    "<p>In " + time_clean + ", there were <b>" +
     dist_crimes +
     " crimes</b> in district " +
     dist +
@@ -65,11 +74,9 @@ export default function summaryStats(dist, isrs, crimes) {
     .outerRadius(outerRadius);
 
   var pie_func = pie();
-
-  //Easy colors accessible via a 10-step ordinal scale
   var color = scaleOrdinal(schemeDark2);
-
-  var pct_recorded = ((dist_grouped[0].y / (dist_grouped[0].y + dist_grouped[1].y)) * 100).toFixed(2)
+  var recorded = (typeof dist_grouped[0] == 'undefined' ? 0 : dist_grouped[0].y);
+  var pct_recorded = ((recorded / (recorded + dist_grouped[1].y)) * 100).toFixed(2)
 
   document.getElementById("body-cameras").innerHTML = `<h3>Body Camera Use</h3>
     <h5>` + pct_recorded + `% of ISRs were recorded by a body camera in ` + dist_name + `.</h5>
@@ -105,7 +112,9 @@ export default function summaryStats(dist, isrs, crimes) {
 
   //Set up groups
   var arcs = svg.selectAll("g.arc")
-    .data(pie_func(dist_grouped.map(d => d.y)))
+    .data(pie_func(dist_grouped.map(function (d) {
+      return (typeof d == "undefined" ? 0 : d.y)
+    })))
     .enter()
     .append("g")
     .attr("class", "arc")

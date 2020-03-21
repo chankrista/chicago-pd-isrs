@@ -10,6 +10,7 @@ import lineChart from "./line-chart";
 
 
 export default function districtMap(data, crimes, districts, isrs) {
+
   //add a time frame filter here once that's figured out.
   if (isrs) {
     var dist_data = groupBy(data, "DISTRICT");
@@ -20,7 +21,7 @@ export default function districtMap(data, crimes, districts, isrs) {
   // Width and Height of the whole visualization
   var width = 500;
   var height = 540;
-
+  document.getElementById(isrs ? "map-isrs" : "map-crimes").innerHTML = "";
   var svg = select(isrs ? "#map-isrs" : "#map-crimes")
     .append("svg")
     .attr("width", width)
@@ -53,7 +54,9 @@ export default function districtMap(data, crimes, districts, isrs) {
     .append("path")
     .attr("fill", function (d) {
       return color(
-        dist_data.filter(row => row.x == d.properties.dist_num)[0].y
+        dist_data.map(r => r.x).includes(d.properties.dist_num) ?
+          dist_data.filter(row => row.x == d.properties.dist_num)[0].y :
+          0
       );
     })
     .attr("stroke", "#333")
@@ -62,22 +65,24 @@ export default function districtMap(data, crimes, districts, isrs) {
     .attr("stroke-width", 1)
     .attr("class", d => d.properties.dist_label)
     .on("click", function (d) {
-      selectAll("path")
-        .attr("stroke-opacity", 0.5)
-        .attr("stroke-width", 1);
-      var paths = document.getElementsByClassName(d.properties.dist_label);
-      paths[0].setAttribute("stroke-opacity", 1);
-      paths[0].setAttribute("stroke-width", 3);
-      paths[1].setAttribute("stroke-opacity", 1);
-      paths[1].setAttribute("stroke-width", 3);
-      var dist_geo = districts.features.filter(
-        row => row.properties.dist_num == d.properties.dist_num
-      );
-      document.getElementById("body-cameras").innerHTML = "";
-      summaryStats(d.properties.dist_num, data, crimes, dist_geo);
-      var dist_data = data.filter(row => row.DISTRICT === d.properties.dist_num);
-      lineChart(dist_data);
-      //add code to highlight bar chart
+      var all_dates = new Set(data.map(row => row.month_year))
+      if (all_dates.size == 1){
+        alert("Time and district filters cannot both be applied. Page must reload!");
+        location.reload()
+      } else {
+        selectAll("path")
+          .attr("stroke-opacity", 0.5)
+          .attr("stroke-width", 1);
+        var paths = document.getElementsByClassName(d.properties.dist_label);
+        paths[0].setAttribute("stroke-opacity", 1);
+        paths[0].setAttribute("stroke-width", 3);
+        paths[1].setAttribute("stroke-opacity", 1);
+        paths[1].setAttribute("stroke-width", 3);
+        document.getElementById("body-cameras").innerHTML = "";
+        summaryStats(d.properties.dist_num, data, crimes, data[0].month_year === data.slice(-1)[0].month_year ? data[0].month_year : "2016-2018");
+        var dist_data = data.filter(row => row.DISTRICT === d.properties.dist_num);
+        lineChart(dist_data, crimes, districts);
+      }
     });
 
   var increment = (color_max - color_min) / 9;

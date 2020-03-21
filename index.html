@@ -13,23 +13,27 @@
     <h1>
       Investigatory Stop Reports by the Chicago Police Department 2016-2018
     </h1>
+    <h5>This interactive visualization represents all stops that CPD has conducted from 2016 to 2018. 
+      <br>Note that time and district filters cannot both be applied at once.</h5>
     
     <div id="app">
       <div id="mid">
 
           <div id="top-row">
-            <div id="line-graph-outer"><h3>ISRs per month</h3><div id="line-graph"></div></div>
+            <div id="line-graph-outer"><h3>ISRs per month</h3><h7>Click to filter by month</h7><div id="line-graph"></div></div>
             <div id="body-cameras"></div>
           </div>
 
           <div id="maps">
             <div class="map">
               <h3>ISRs by District</h3>
+              <h7>Click to filter by district</h7>
               <div id="map-isrs"></div>
               <div id="summary_isrs"></div>
             </div>
             <div class="map">
               <h3>Crimes by District</h3>
+              <h7>Click to filter by district</h7>
               <div id="map-crimes"></div>
               <div id="summary_crimes"></div>
             </div>
